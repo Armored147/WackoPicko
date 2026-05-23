@@ -1,0 +1,28 @@
+language: EN
+strict: false
+
+output:
+  file_path: results.sarif
+  format: SARIF
+
+sast:
+  include:
+    - .
+  exclude:
+    - node_modules
+    - vendor
+
+sca:
+  include:
+    - .
+  exclude:
+    - node_modules
+    - vendor
+
+ss:
+  include:
+    - .
+  exclude:
+    - tests
+    - node_modules
+    - vendor
