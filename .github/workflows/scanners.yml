@@ -12,7 +12,7 @@ on:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    permissions:                    # ← esto faltaba
+    permissions:
       security-events: write
       actions: read
       contents: read
@@ -27,10 +27,18 @@ jobs:
         with:
           scan_config_path: .github/scan-config.yaml
 
+      - name: Guardar resultados SAST
+        if: always()
+        run: cp results.csv sast-results.csv 2>/dev/null || true
+
       - uses: fluidattacks/sca-action@1.2.0
         id: sca
         with:
           scan_config_path: .github/scan-config.yaml
+
+      - name: Guardar resultados SCA
+        if: always()
+        run: cp results.csv sca-results.csv 2>/dev/null || true
 
       - uses: fluidattacks/ss-action@0.2.0
         id: ss
@@ -38,19 +46,23 @@ jobs:
           scanner_mode: full
           scan_config_path: .github/scan-config.yaml
 
-      - name: Debug - Ver archivos generados
+      - name: Guardar resultados SS
+        if: always()
+        run: cp results.csv ss-results.csv 2>/dev/null || true
+
+      - name: Combinar CSVs
         if: always()
         run: |
-          echo "=== Archivos en el directorio raíz ==="
-          ls -la
-          echo "=== Buscando archivos CSV ==="
-          find . -name "*.csv" 2>/dev/null
-          echo "=== Contenido de results.csv si existe ==="
-          cat results.csv 2>/dev/null || echo "Archivo no encontrado o vacío"
+          head -1 results.csv > all-results.csv
+          for f in sast-results.csv sca-results.csv ss-results.csv; do
+            [ -f "$f" ] && tail -n +2 "$f" >> all-results.csv || true
+          done
+          echo "=== Total de hallazgos ==="
+          wc -l all-results.csv
 
       - name: Upload CSV Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: security-results
-          path: results.csv
+          path: all-results.csv
