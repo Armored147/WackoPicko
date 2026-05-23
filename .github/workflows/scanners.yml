@@ -35,6 +35,7 @@ jobs:
       - uses: fluidattacks/ss-action@0.2.0
         id: ss
         with:
+          scanner_mode: full
           scan_config_path: .github/scan-config.yaml
 
       - name: Upload SARIF
