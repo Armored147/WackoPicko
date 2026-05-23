@@ -1,9 +1,10 @@
 language: EN
 strict: true
+strictness_threshold: high
 
 output:
   file_path: results
-  format: ALL  # genera results.sarif y results.csv
+  format: ALL  
 
 sast:
   include:
