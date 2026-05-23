@@ -38,6 +38,16 @@ jobs:
           scanner_mode: full
           scan_config_path: .github/scan-config.yaml
 
+      - name: Debug - Ver archivos generados
+        if: always()
+        run: |
+          echo "=== Archivos en el directorio raíz ==="
+          ls -la
+          echo "=== Buscando archivos CSV ==="
+          find . -name "*.csv" 2>/dev/null
+          echo "=== Contenido de results.csv si existe ==="
+          cat results.csv 2>/dev/null || echo "Archivo no encontrado o vacío"
+
       - name: Upload CSV Artifact
         if: always()
         uses: actions/upload-artifact@v4
