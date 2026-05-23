@@ -29,7 +29,9 @@ jobs:
 
       - name: Guardar resultados SAST
         if: always()
-        run: cp results.csv sast-results.csv 2>/dev/null || true
+        run: |
+          cp results.csv sast-results.csv 2>/dev/null || true
+          cp results.sarif sast-results.sarif 2>/dev/null || true
 
       - uses: fluidattacks/sca-action@1.2.0
         id: sca
@@ -38,7 +40,8 @@ jobs:
 
       - name: Guardar resultados SCA
         if: always()
-        run: cp results.csv sca-results.csv 2>/dev/null || true
+        run: |
+          cp results.csv sca-results.csv 2>/dev/null || true
 
       - uses: fluidattacks/ss-action@0.2.0
         id: ss
@@ -48,7 +51,8 @@ jobs:
 
       - name: Guardar resultados SS
         if: always()
-        run: cp results.csv ss-results.csv 2>/dev/null || true
+        run: |
+          cp results.csv ss-results.csv 2>/dev/null || true
 
       - name: Combinar CSVs
         if: always()
@@ -57,8 +61,12 @@ jobs:
           for f in sast-results.csv sca-results.csv ss-results.csv; do
             [ -f "$f" ] && tail -n +2 "$f" >> all-results.csv || true
           done
-          echo "=== Total de hallazgos ==="
-          wc -l all-results.csv
+
+      - name: Upload results to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: sast-results.sarif
 
       - name: Upload CSV Artifact
         if: always()
